@@ -168,6 +168,9 @@ int main() {
 	child_stack = (void *) malloc(SIZE);
   	assert(child_stack != NULL);
   	int pid, status, rc;
+
+	int nThreads = 2;
+
 	int res;
 	clock_t t_inicial,t_final;
 	char namedest[80];
@@ -182,8 +185,9 @@ int main() {
 		fprintf(stderr,"	ERROR: Can't open source file\n");
 		exit(1);
 	}
-	//printf("Procesando imagen de: Renglones = %d, Columnas = %d\n", imagenfte.infoheader.rows, imagenfte.infoheader.cols);
 	initBMP(&imagenfte, &imagendst);
+	//printf("Procesando imagen de: Renglones = %d, Columnas = %d\n", imagenfte.infoheader.rows, imagenfte.infoheader.cols);
+	/*initBMP(&imagenfte, &imagendst);
 	int args[2];
 	args[0] = 1;
 	args[1] = 101;
@@ -192,12 +196,20 @@ int main() {
 	args2[0] = 100;
 	args2[1] = 201;
 
-	pid = clone(run, child_stack + (SIZE * 2) /sizeof(void *), 0x00000100, args2);
+	pid = clone(run, child_stack + (SIZE * 2) /sizeof(void *), 0x00000100, args2);*/
+	int n;
+	int space = imagenfte.infoheader.rows / nThreads;
+	for(n = 1; n <= nThreads; n++) {
+		int args[2];
+		args[0] = space * (n - 1);
+		args[1] = args[0] + space;
+		printf("Thread %d: %d - %d\n", n, args[0], args[1]);
+		pid = clone(run, child_stack + (SIZE/sizeof(void *)) * n, 0x00000100, args);
+	}
 
 	//assert(pid != -1);
   	status = 0;
   	while(rc != -1) {
-
 		rc = waitpid(-1, &status, __WCLONE);
 		printf("THREAD RC: %d\n", rc);
 	}
