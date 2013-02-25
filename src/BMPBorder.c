@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sched.h>
 #include <assert.h>
+#include <sys/sysinfo.h>
 
 #define DIF 16
 #define SIZE 65536
@@ -160,6 +161,7 @@ void processBMP(IMAGE imagenfte, IMAGE *imagedst, int y0, int y1) {
 int run(int *argv) {
 	printf("\n---\nThread from %d to %d\n---\n", argv[0], argv[1]);
 	processBMP(imagenfte, &imagendst, argv[0], argv[1]);
+	free(argv);
 	return 0;
 }
 
@@ -168,8 +170,8 @@ int main() {
 	child_stack = (void *) malloc(SIZE);
   	assert(child_stack != NULL);
   	int pid, status, rc;
-
-	int nThreads = 2;
+  	printf("%d cores available\n", get_nprocs());
+	int nThreads = get_nprocs();
 
 	int res;
 	clock_t t_inicial,t_final;
@@ -200,7 +202,8 @@ int main() {
 	int n;
 	int space = imagenfte.infoheader.rows / nThreads;
 	for(n = 1; n <= nThreads; n++) {
-		int args[2];
+		//int args[2];
+		int *args = (int*) malloc(2 * sizeof(int));
 		args[0] = space * (n - 1);
 		args[1] = args[0] + space;
 		printf("Thread %d: %d - %d\n", n, args[0], args[1]);
