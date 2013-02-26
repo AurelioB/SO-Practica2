@@ -57,8 +57,8 @@ IMAGE imagenfte, imagendst;
 
 int loadBMP(char *filename, IMAGE *image) {
   	FILE *fin;
-   	int i=0;
-   	int totpixs=0;
+   	int i = 0;
+   	int totpixs = 0;
    	fin = fopen(filename, "rb+");
    	// Si el archivo no existe
    	if (fin == NULL) {
@@ -80,9 +80,9 @@ int loadBMP(char *filename, IMAGE *image) {
 	}
 	printf("-- Width: %d\n-- Height: %d\n", image->infoheader.cols, image->infoheader.rows);
 	image->pixel = (PIXEL *)malloc(sizeof(PIXEL) * image->infoheader.cols * image->infoheader.rows); 
-	totpixs=image->infoheader.rows*image->infoheader.cols;
-   	while(i<totpixs) {
-		fread(image->pixel+i, sizeof(PIXEL),512, fin); i+=512;
+	totpixs = image->infoheader.rows * image->infoheader.cols;
+   	while(i < totpixs) {
+		fread(image->pixel + i, sizeof(PIXEL), 512, fin); i+=512;
    	}
    	fclose(fin);
    	return 0;
@@ -90,14 +90,14 @@ int loadBMP(char *filename, IMAGE *image) {
 
 int saveBMP(char *filename, IMAGE *image) {
    	FILE *fout;
-   	int i,totpixs;
-   	fout=fopen(filename,"wb");
+   	int i, totpixs;
+   	fout=fopen(filename, "wb");
    	if (fout == NULL) return(-1); // Error // Escribe encabezado
 	fwrite(&image->header, sizeof(HEADER), 1, fout); // Escribe información del encabezado
 	fwrite(&image->infoheader, sizeof(INFOHEADER), 1, fout);
-	i=0;
-	totpixs=image->infoheader.rows*image->infoheader.cols;
-	while(i<totpixs) {
+	i = 0;
+	totpixs = image->infoheader.rows*image->infoheader.cols;
+	while(i < totpixs) {
 		fwrite(image->pixel+i,sizeof(PIXEL), 512, fout); i+=512;
 	}
    	fclose(fout);
@@ -112,8 +112,8 @@ void initBMP(IMAGE *imagefte, IMAGE *imagedst) {
 	imagedst->pixel = (PIXEL *) malloc(sizeof(PIXEL) * imagefte->infoheader.rows * imagefte->infoheader.cols);
 }
 
-void processBMP(IMAGE imagenfte, IMAGE *imagedst, int y0, int y1) {
-	IMAGE * imagefte = &imagenfte;
+void processBMP(IMAGE *imagefte, IMAGE *imagedst, int y0, int y1) {
+	//IMAGE * imagefte = &imagenfte;
 	int i, j;
 	int count = 0;
 	PIXEL *pfte, *pdst;
@@ -138,14 +138,14 @@ void processBMP(IMAGE imagenfte, IMAGE *imagedst, int y0, int y1) {
       		v7 = pfte + imageCols + 1;
 
       		pdst = imagedst->pixel + imageCols * i + j;
-			if(	abs(blackandwhite(*pfte) - blackandwhite(*v0)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v1)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v2)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v3)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v4)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v5)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v6)) > DIF || 
-				abs(blackandwhite(*pfte) - blackandwhite(*v7)) > DIF
+			if(	abs( blackandwhite( *pfte ) - blackandwhite( *v0 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v1 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v2 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v3 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v4 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v5 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v6 ) ) > DIF || 
+				abs( blackandwhite( *pfte ) - blackandwhite( *v7 ) ) > DIF
 			) {
 				pdst->red = 0;
 				pdst->green = 0;
@@ -160,7 +160,7 @@ void processBMP(IMAGE imagenfte, IMAGE *imagedst, int y0, int y1) {
 
 int run(int *argv) {
 	printf("\n---\nThread from %d to %d\n---\n", argv[0], argv[1]);
-	processBMP(imagenfte, &imagendst, argv[0], argv[1]);
+	processBMP(&imagenfte, &imagendst, argv[0], argv[1]);
 	free(argv);
 	return 0;
 }
@@ -205,7 +205,7 @@ int main() {
 		//int args[2];
 		int *args = (int*) malloc(2 * sizeof(int));
 		args[0] = space * (n - 1);
-		args[1] = args[0] + space;
+		args[1] = args[0] + space + 1;
 		printf("Thread %d: %d - %d\n", n, args[0], args[1]);
 		pid = clone(run, child_stack + (SIZE/sizeof(void *)) * n, 0x00000100, args);
 	}
